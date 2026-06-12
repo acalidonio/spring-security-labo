@@ -11,9 +11,11 @@ import com.server.app.dto.permission.AssingPermissionDto;
 @Data
 public class RoleDto {
 
-    @NotBlank(message = "El nombre del rol es obligatorio")
-    @Size(max = 50, message = "El nombre del rol no puede superar 50 caracteres")
-    private String name;
+  @NotBlank(message = "El nombre del rol es obligatorio")
+  @Size(max = 50, message = "El nombre del rol no puede superar 50 caracteres")
+  private String name;
 
-    private Set<AssingPermissionDto> permissions;
+  private Set<AssingPermissionDto> permissions;
+
+  private Boolean active = true;
 }
