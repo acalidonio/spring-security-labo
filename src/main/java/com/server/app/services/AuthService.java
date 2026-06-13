@@ -42,7 +42,7 @@ public class AuthService {
             throw new UnauthorizedException("Your account has been blocked");
         }
 
-        if (user.getRole() == null || !user.getRole().getActive()) {
+        if (user.getRole() == null || Boolean.FALSE.equals(user.getRole().getActive())) {
             throw new UnauthorizedException("Your account role is not active");
         }
 
@@ -63,7 +63,7 @@ public class AuthService {
         Role adminRole = roleRepository.findByName("ADMIN")
                 .orElseThrow(() -> new NotFoundException("Rol ADMIN no encontrado"));
 
-        if (!adminRole.getActive()) {
+        if (Boolean.FALSE.equals(adminRole.getActive())) {
             throw new UnauthorizedException("El rol ADMIN no está activo");
         }
 

@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
@@ -97,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (!user.getRole().getActive()) {
+            if (Boolean.FALSE.equals(user.getRole().getActive())) {
                 sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Your account role is not active");
                 return;
             }
