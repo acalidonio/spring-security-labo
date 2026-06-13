@@ -13,6 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.server.app.repositories.UserRepository;
+import com.server.app.exceptions.ConfictException;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +28,7 @@ public class RoleService {
 
   private final RoleRepository roleRepository;
   private final PermissionRepository permissionRepository;
+  private final UserRepository userRepository;
 
   @Transactional
   public Page<Role> findAll(int page, int size) {
@@ -41,6 +45,11 @@ public class RoleService {
     Role role = new Role();
     role.setName(dto.getName());
     role.setActive(dto.getActive());
+    setPermissions(dto, role);
+    return roleRepository.save(role);
+  }
+
+  private void setPermissions(RoleDto dto, Role role) {
     if (dto.getPermissions() != null && !dto.getPermissions().isEmpty()) {
       List<Long> ids = dto.getPermissions()
           .stream()
@@ -50,26 +59,26 @@ public class RoleService {
       Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(ids));
       role.setPermissions(permissions);
     }
-    return roleRepository.save(role);
   }
 
   @Transactional
   public Role update(Long id, RoleDto dto) {
     Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role not found"));
     role.setName(dto.getName());
-    if (dto.getPermissions() != null && !dto.getPermissions().isEmpty()) {
-      List<Long> ids = dto.getPermissions()
-          .stream()
-          .map(AssingPermissionDto::getId)
-          .filter(Objects::nonNull)
-          .toList();
-      Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(ids));
-      role.setPermissions(permissions);
-    }
+    setPermissions(dto, role);
 
     if (dto.getActive() != null) {
       role.setActive(dto.getActive());
     }
     return roleRepository.save(role);
+  }
+
+  @Transactional
+  public void delete(Long id) {
+    if (userRepository.existsByRoleId(id)) {
+      throw new ConfictException("El rol no puede ser eliminado porque tiene usuarios asignados.");
+    }
+    Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role not found"));
+    roleRepository.delete(role);
   }
 }
